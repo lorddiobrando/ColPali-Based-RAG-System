@@ -18,6 +18,8 @@ A Flask-based multimodal RAG starter tailored for the ViDoRe benchmark (`vidore/
    - `copy .env.example .env`
 3. Prepare ViDoRe artifacts:
    - `python scripts/prepare_vidore.py`
+4. Build local vector index:
+   - `python scripts/build_index.py --limit 500`
 4. Run Flask app:
    - `flask run`
 
@@ -31,6 +33,6 @@ A Flask-based multimodal RAG starter tailored for the ViDoRe benchmark (`vidore/
 
 ## Next milestones
 
-- Build ColPali embedding + indexing pipeline.
+- Swap baseline image encoder to true ColPali embeddings.
 - Add retrieval endpoint and result citation UI.
 - Add benchmark evaluation (Recall@k, MRR, nDCG).

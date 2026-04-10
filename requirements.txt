@@ -4,3 +4,5 @@ pyyaml
 python-dotenv
 Pillow
 tqdm
+qdrant-client
+numpy
