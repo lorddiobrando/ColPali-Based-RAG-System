@@ -1,0 +1,6 @@
+flask
+datasets
+pyyaml
+python-dotenv
+Pillow
+tqdm
