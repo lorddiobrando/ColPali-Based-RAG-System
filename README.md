@@ -1,38 +1,107 @@
 # ColPali-Based RAG System
 
-A Flask-based multimodal RAG starter tailored for the ViDoRe benchmark (`vidore/vidore-benchmark`).
+A multimodal Retrieval-Augmented Generation system that uses **ColQwen2** (ColPali-style vision encoder) with **late interaction scoring** to search through document pages as images — no OCR needed.
 
-## What is implemented now
+Built on the [ViDoRe benchmark](https://huggingface.co/collections/vidore/vidore-benchmark-667173f98e70a1c0fa4db00d) dataset.
 
-- Project scaffold for app, data pipeline, and scripts.
-- ViDoRe preparation pipeline (`scripts/prepare_vidore.py`) that downloads dataset splits and writes a normalized manifest.
-- Config-driven setup via `.env` and `configs/vidore.yaml`.
+## Features
+
+- **ColQwen2 Encoder** — Vision-language model that "sees" PDF pages and produces multi-vector embeddings
+- **Late Interaction (MaxSim)** — ColBERT-style matching for precise retrieval: each query token finds its best visual patch match
+- **Two-Stage Retrieval** — Mean-pooled cosine search for candidates → MaxSim reranking for precision
+- **RAG Generation** — Answer questions with cited page references via OpenRouter API
+- **Retrieval-Only Mode** — Works without an LLM API key for pure document search
+- **Polished Flask UI** — Dark-themed interface with page previews, debug panel, and responsive design
+
+## Architecture
+
+```
+Query → ColQwen2 encode → Cosine search (Qdrant) → Top-50 candidates
+        → MaxSim rerank (cached multi-vectors) → Top-K results
+        → OpenRouter LLM → Answer + Citations
+```
 
 ## Quickstart
 
-1. Create a virtual environment and install dependencies:
-   - `python -m venv .venv`
-   - Windows PowerShell: `.venv\Scripts\Activate.ps1`
-   - `pip install -r requirements.txt`
-2. Copy environment template:
-   - `copy .env.example .env`
-3. Prepare ViDoRe artifacts:
-   - `python scripts/prepare_vidore.py`
-4. Build local vector index:
-   - `python scripts/build_index.py --limit 500`
-4. Run Flask app:
-   - `flask run`
+### 1. Environment Setup
 
-## Project layout
+```bash
+python -m venv .venv
+# Windows PowerShell:
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
-- `app/`: Flask app
-- `src/`: core python modules (config, data, retrieval, evaluation)
-- `scripts/`: executable entrypoints
-- `configs/`: yaml configs
-- `data/`: local raw/processed/cache/index artifacts (gitignored in practice)
+### 2. Configure
 
-## Next milestones
+```bash
+copy .env.example .env
+# Edit .env: set OPENROUTER_API_KEY for RAG mode (optional)
+```
 
-- Swap baseline image encoder to true ColPali embeddings.
-- Add retrieval endpoint and result citation UI.
-- Add benchmark evaluation (Recall@k, MRR, nDCG).
+### 3. Prepare ViDoRe Dataset
+
+```bash
+python scripts/prepare_vidore.py
+```
+
+### 4. Build Vector Index
+
+```bash
+# Full index (GPU recommended — RTX 3060 or better):
+python scripts/build_index.py
+
+# Quick demo with limited pages:
+python scripts/build_index.py --limit 100
+
+# Reset and re-index:
+python scripts/build_index.py --reset --limit 100
+```
+
+### 5. Run the App
+
+```bash
+flask run
+```
+
+Open [http://localhost:5000](http://localhost:5000) and start querying.
+
+## Project Layout
+
+```
+├── app/                    # Flask application
+│   ├── routes.py           # API endpoints
+│   ├── services/           # Retrieval + generation services
+│   ├── templates/          # Jinja2 HTML templates
+│   └── static/             # CSS + JS assets
+├── src/                    # Core modules
+│   ├── config/             # Settings and env config
+│   ├── data/               # Dataset loaders and schemas
+│   ├── models/             # ColQwen2 encoder + baseline
+│   ├── indexing/           # Qdrant vector store + index builder
+│   └── retrieval/          # Two-stage retrieval pipeline
+├── scripts/                # CLI entrypoints
+│   ├── prepare_vidore.py   # Download and normalize ViDoRe
+│   └── build_index.py      # Build vector index
+├── configs/                # YAML configs
+│   └── vidore.yaml         # Dataset split + processing config
+└── data/                   # Local artifacts (gitignored)
+    ├── processed/          # Manifest + exported images
+    └── indexes/            # Qdrant database files
+```
+
+## Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `COLPALI_MODEL` | `vidore/colqwen2-v1.0` | HuggingFace model ID |
+| `ENCODER_TYPE` | `colpali` | `colpali` or `baseline` |
+| `QDRANT_PATH` | `./data/indexes/qdrant` | Local Qdrant storage |
+| `OPENROUTER_API_KEY` | (empty) | Set to enable RAG generation |
+| `OPENROUTER_MODEL` | `google/gemini-2.0-flash-001` | LLM model for answers |
+
+## Next Milestones
+
+- Benchmark evaluation (Recall@k, MRR, nDCG)
+- Text-only OCR baseline comparison
+- Async ingestion for large corpora
