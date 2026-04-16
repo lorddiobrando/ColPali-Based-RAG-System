@@ -15,6 +15,18 @@ class AppSettings:
     vidore_output_dir: Path
     vidore_manifest_path: Path
 
+    # Encoder
+    colpali_model: str
+    encoder_type: str  # "colpali" or "baseline"
+
+    # Qdrant
+    qdrant_path: Path
+    qdrant_collection: str
+
+    # OpenRouter
+    openrouter_api_key: str | None
+    openrouter_model: str
+
 
 def get_settings() -> AppSettings:
     load_dotenv()
@@ -31,4 +43,15 @@ def get_settings() -> AppSettings:
         vidore_dataset=os.getenv("VIDORE_DATASET", "vidore/vidore-benchmark"),
         vidore_output_dir=vidore_output_dir,
         vidore_manifest_path=vidore_manifest_path,
+        # Encoder
+        colpali_model=os.getenv("COLPALI_MODEL", "vidore/colqwen2-v1.0"),
+        encoder_type=os.getenv("ENCODER_TYPE", "colpali"),
+        # Qdrant
+        qdrant_path=Path(os.getenv("QDRANT_PATH", "./data/indexes/qdrant")).resolve(),
+        qdrant_collection=os.getenv("QDRANT_COLLECTION", "vidore_pages"),
+        # OpenRouter
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
+        openrouter_model=os.getenv(
+            "OPENROUTER_MODEL", "google/gemini-2.0-flash-001"
+        ),
     )
