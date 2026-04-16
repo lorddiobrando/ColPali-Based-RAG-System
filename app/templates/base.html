@@ -3,13 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ColPali RAG</title>
+    <meta name="description" content="ColPali-based visual document retrieval system using ColQwen2 and late-interaction scoring on the ViDoRe benchmark." />
+    <title>ColPali RAG — Visual Document Retrieval</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}" />
   </head>
   <body>
-    <main class="container">
-      {% block content %}{% endblock %}
-    </main>
+    {% block content %}{% endblock %}
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   </body>
-  </html>
+</html>

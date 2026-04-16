@@ -1,8 +1,140 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="card">
-  <h1>ColPali-based RAG</h1>
-  <p class="muted">ViDoRe-first scaffold is ready. Ingestion and retrieval endpoints are next.</p>
-</section>
+<!-- ───────────── Header ───────────── -->
+<header class="app-header">
+  <div class="header-glow"></div>
+  <div class="header-content">
+    <div class="logo-group">
+      <div class="logo-icon" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="16" stroke="url(#lg)" stroke-width="2"/>
+          <path d="M12 18 L18 10 L24 18 L18 26Z" fill="url(#lg)" opacity="0.7"/>
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="36" y2="36">
+              <stop stop-color="#6EE7F9"/>
+              <stop offset="1" stop-color="#A78BFA"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-title">ColPali <span class="accent-text">RAG</span></h1>
+        <p class="logo-subtitle">Visual Document Retrieval · ViDoRe Benchmark</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-cyan" id="badge-index">Index: —</span>
+      <span class="badge badge-violet" id="badge-encoder">{{ model_name }}</span>
+    </div>
+  </div>
+</header>
+
+<!-- ───────────── Main ───────────── -->
+<main class="container">
+
+  <!-- Query Section -->
+  <section class="query-section card glass-card" id="query-section">
+    <div class="query-header">
+      <h2>Ask a Question</h2>
+      <div class="mode-toggle">
+        <label class="toggle-label" for="mode-select">Mode:</label>
+        <select id="mode-select" class="select-control">
+          <option value="rag">RAG (Retrieve + Generate)</option>
+          <option value="retrieval_only">Retrieval Only</option>
+        </select>
+        <label class="toggle-label" for="topk-select">Top-K:</label>
+        <select id="topk-select" class="select-control">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+    </div>
+    <form id="query-form" autocomplete="off">
+      <div class="input-row">
+        <input
+          type="text"
+          id="query-input"
+          class="query-input"
+          placeholder="e.g. What is the total energy consumption in 2020?"
+          required
+        />
+        <button type="submit" class="btn btn-primary" id="submit-btn">
+          <span class="btn-text">Search</span>
+          <span class="btn-spinner" hidden>
+            <svg class="spinner-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31 31" stroke-linecap="round"/></svg>
+          </span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Answer Section (hidden until results) -->
+  <section class="answer-section card glass-card" id="answer-section" hidden>
+    <div class="answer-header">
+      <h2>Answer</h2>
+      <span class="badge badge-green" id="answer-mode-badge">RAG</span>
+    </div>
+    <div class="answer-body" id="answer-body">
+      <p class="answer-text" id="answer-text"></p>
+    </div>
+    <div class="answer-meta" id="answer-meta"></div>
+  </section>
+
+  <!-- Results Section -->
+  <section class="results-section" id="results-section" hidden>
+    <div class="results-header">
+      <h2>Retrieved Pages</h2>
+      <button class="btn btn-ghost" id="toggle-debug" type="button">Debug Info</button>
+    </div>
+    <div class="results-grid" id="results-grid"></div>
+  </section>
+
+  <!-- Debug Panel -->
+  <section class="debug-section card glass-card" id="debug-section" hidden>
+    <h3>Debug · Performance</h3>
+    <div class="debug-grid" id="debug-grid"></div>
+  </section>
+
+  <!-- Loading Skeleton -->
+  <section class="skeleton-section" id="skeleton-section" hidden>
+    <div class="skeleton-card">
+      <div class="skeleton-line w80"></div>
+      <div class="skeleton-line w60"></div>
+      <div class="skeleton-line w90"></div>
+    </div>
+    <div class="skeleton-row">
+      <div class="skeleton-card-sm"></div>
+      <div class="skeleton-card-sm"></div>
+      <div class="skeleton-card-sm"></div>
+    </div>
+  </section>
+
+  <!-- Empty State -->
+  <section class="empty-state" id="empty-state">
+    <div class="empty-icon" aria-hidden="true">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+        <rect x="10" y="14" width="40" height="52" rx="4" stroke="#94A3B8" stroke-width="2" fill="none"/>
+        <rect x="30" y="8" width="40" height="52" rx="4" stroke="#6EE7F9" stroke-width="2" fill="none" opacity="0.5"/>
+        <line x1="18" y1="28" x2="42" y2="28" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="18" y1="34" x2="38" y2="34" stroke="#94A3B8" stroke-width="1.5"/>
+        <line x1="18" y1="40" x2="40" y2="40" stroke="#94A3B8" stroke-width="1.5"/>
+        <circle cx="55" cy="55" r="13" stroke="#A78BFA" stroke-width="2" fill="none"/>
+        <line x1="64" y1="64" x2="72" y2="72" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="empty-title">Search across your indexed documents</p>
+    <p class="empty-desc">
+      ColPali uses vision transformers to <em>see</em> your PDF pages
+      and ColBERT-style late interaction to find the exact spot that answers your question.
+    </p>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="app-footer">
+  <p>ColPali RAG System · Powered by <span class="accent-text">{{ model_name }}</span> + ViDoRe</p>
+</footer>
 {% endblock %}
