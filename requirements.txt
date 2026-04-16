@@ -6,3 +6,12 @@ Pillow
 tqdm
 qdrant-client
 numpy
+
+# ColPali / ColQwen2 encoder
+colpali-engine
+torch
+transformers
+accelerate
+
+# Generation (OpenRouter)
+requests
