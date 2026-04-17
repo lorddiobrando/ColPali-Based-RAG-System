@@ -70,6 +70,25 @@ flask run
 
 Open [http://localhost:5000](http://localhost:5000) and start querying.
 
+### 6. Evaluation
+
+The system includes a comprehensive LLM-as-a-judge evaluation framework running on the standard ViDoRe benchmark. Evaluation tests Retrieval Quality, Answer Generation Quality, and Factual Grounding (Hallucination detection).
+
+```bash
+# Run quick sample evaluation (50 queries total)
+make eval-quick
+
+# Full retrieval evaluation on all 8,443 queries
+make eval-retrieval
+
+# Generation & Grounding evaluation (Requires OPENROUTER_API_KEY)
+make eval-generation
+make eval-grounding
+
+# Run all axes and generate a Markdown report
+make eval-all
+```
+
 ## Project Layout
 
 ```
@@ -107,6 +126,6 @@ Open [http://localhost:5000](http://localhost:5000) and start querying.
 
 ## Next Milestones
 
-- Benchmark evaluation (Recall@k, MRR, nDCG)
 - Text-only OCR baseline comparison
 - Async ingestion for large corpora
+- Integration with external knowledge graphs
